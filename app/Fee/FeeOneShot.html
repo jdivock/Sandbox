@@ -1,0 +1,130 @@
+<!doctype html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/1.0.rc.2/handlebars.js"></script>
+
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+    body {
+        margin-top: 15px;
+    }
+
+    ul.even-bold li:nth-child(even){
+        font-weight: bold;
+    }
+
+    ul.odd-bold li:nth-child(odd){
+        font-weight: bold;
+    }
+
+    </style>
+
+    <script>
+    $(document).ready(function(){
+
+        Handlebars.registerHelper("hashify", function(ref){
+            return '#' + ref;
+        })
+
+        Handlebars.registerHelper("eachSwitch", function(flip, context, options) {
+              var ret = "";
+              var test;
+
+              for(var i=0, j=context.length; i<j; i++) {
+                if( i % 2 && flip === 'even'){
+                    ret = ret + options.fn(context[i]);
+                } else if ( !(i % 2) && flip === 'odd' ) {
+                    ret = ret + options.fn(context[i]);
+                }
+              }
+
+              return ret;
+        })
+
+        // This is pretty hacky, but the endpoint isn't a "real" jsonp endpoint so I can't call it propery with a dynamic callback
+        // and make use of jquery or angular's jsonp libraries . . . . sooo just rolling my own here
+        function callback(data){
+            console.log(data);
+            var source = $("#fee-template").html();
+            var template = Handlebars.compile(source);
+            var html = template({'root': data});
+
+            $('body').html(html);
+
+            // lazy init by just clicking the first one
+            $('ul.nav li a')[0].click();
+        }
+
+        $.ajax('http://cooktv.sndimg.com/webcook/sandbox/perf/topics.json?callback=callback').done( function(data){
+           eval(data);
+        } );
+
+    });
+    </script>
+
+    <script id="fee-template" type="text/x-handlebars-template">
+
+    <div class="row">
+
+        {{! Building Left hand nav }}
+        <div class="col-md-3">
+            <ul class="nav nav-pills nav-stacked">
+            {{#each root.topics}}
+            <li><a href="{{hashify name}}" data-toggle="tab">{{name}}</a></li>
+            {{/each}}
+            </ul>
+        </div>
+
+        {{! Building content area }}
+        <div class="col-md-9">
+            <legend>CONTENT</legend>
+
+            <div class="tab-content">
+                {{#each root.topics}}
+                    <div class="tab-pane" id={{name}}>
+
+                        {{! First column of links }}
+                        <div class='col-md-4'>
+                            <ul class='even-bold'>
+                            {{#eachSwitch 'even' content}}
+                                <li><a href="{{link_src}}">{{link_text}}</a></li>
+                            {{/eachSwitch}}
+                            </ul>
+                        </div>
+
+                        {{! Second column of links }}
+                        <div class='col-md-4'>
+                            <ul class='odd-bold'>
+                            {{#eachSwitch 'odd' content}}
+                                <li><a href="{{link_src}}">{{link_text}}</a></li>
+                            {{/eachSwitch}}
+                            </ul>
+                        </div>
+
+                    </div>
+                {{/each}}
+            </div>
+
+        </div>
+
+    </div>
+
+    </script>
+
+</head>
+
+<body class="container"></body>
+
+</html>
