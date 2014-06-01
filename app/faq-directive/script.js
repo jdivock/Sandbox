@@ -43,7 +43,10 @@ directive('question', function() {
                 faqCtrl.toggleAnswer(scope);
             };
         },
-        template: '<div ng-click=toggleAnswer()>' + '<i ng-class="{\'fa-minus-circle\': display, \'fa-plus-circle\': !display}" class="fa"></i>' + '<span ng-transclude></span>' + '</div>'
+        template: '<div ng-click=toggleAnswer()>\
+            <i ng-class="{\'fa-minus-circle\': display, \'fa-plus-circle\': !display}" class="fa"></i>\
+            <span ng-transclude></span>\
+            </div>'
     };
 }).
 directive('answer', function() {
